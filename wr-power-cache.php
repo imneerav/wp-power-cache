@@ -21,7 +21,13 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 			'clear_cache' => [
 				'switch_theme',
 				'comment_post',
-				'permalink_structure_changed'
+				'permalink_structure_changed',
+				'save_post', /* Test all below */
+				'edit_category_form',
+				'edited_category',
+				'wp_insert_comment',
+				'activated_plugin',
+				'deactivated_plugin',
 			]
 		);
 
@@ -30,9 +36,39 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 			$this->cacheFolder = isset( $_SERVER['SERVER_NAME'] ) ? md5( $_SERVER['SERVER_NAME'] ) : $this->cacheFolder;
 			if ( ! file_exists( WRPC_ROOT_DIR . $this->cacheFolder ) ) {
 				mkdir( WRPC_ROOT_DIR . $this->cacheFolder );
+				$this->generate_htaccess();
 			}
 			$this->add_filters();
 			$this->add_actions();
+		}
+		
+		public function generate_htaccess() {
+			$content = "
+			# BEGIN WP Power Cache
+			Options -Indexes
+			<IfModule mod_mime.c>
+			  <FilesMatch "\.html\.gz$">
+				ForceType text/html
+				FileETag None
+			  </FilesMatch>
+			  AddEncoding gzip .gz
+			  AddType text/html .gz
+			</IfModule>
+			<IfModule mod_deflate.c>
+			  SetEnvIfNoCase Request_URI \.gz$ no-gzip
+			</IfModule>
+			<IfModule mod_headers.c>
+			  Header set Vary \"Accept-Encoding, Cookie\"
+			  Header set Cache-Control 'max-age=3, must-revalidate'
+			</IfModule>
+			<IfModule mod_expires.c>
+			  ExpiresActive On
+			  ExpiresByType text/html A3
+			</IfModule>
+			Options -Indexes
+			# END WP Power Cache";
+			
+			file_put_contents( WRPC_ROOT_DIR . $this->cacheFolder . '/.htaccess', $content );
 		}
 
 		public function get_post_action_handler( $q ) {
