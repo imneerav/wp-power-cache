@@ -1,6 +1,15 @@
 <?php
+/**
+ * @package: WpRetro Power Cache
+ * Author: WpRetro
+ * Description: A simple page/post cache plugin
+ * Plugin URI: http://wpretro.com/plugins/Power-Cache
+ * Version: 0.0.1
+ */
 // Exit if accessed directly
-if ( !defined( 'ABSPATH' ) ) exit;
+if ( ! defined( 'ABSPATH' ) ) {
+	exit;
+}
 $active_tab = isset( $_GET[ 'tab' ] ) ? $_GET[ 'tab' ] : 'debug_options';
 ?>
 <div class="wrap">

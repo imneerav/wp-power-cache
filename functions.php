@@ -17,27 +17,13 @@ if ( ! function_exists( 'pre' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wrpc_start_loading_time' ) ) {
-	function wrpc_start_loading_time() {
-		$time  = microtime();
-		$time  = explode( ' ', $time );
-		$start = $time[1] + $time[0];
-		define( 'WRPC_START_TIME', $start );
-	}
-}
-if ( ! function_exists( 'wrpc_end_loading_time' ) ) {
-	function wrpc_end_loading_time() {
-		$time   = microtime();
-		$time   = explode( ' ', $time );
-		$finish = $time[1] + $time[0];
-		$finish = round( ( $finish - WRPC_START_TIME ), 4 );
-		wrpc_print_loading_time( $finish );
-	}
-}
-
-if ( ! function_exists( 'wrpc_print_loading_time' ) ) {
-	function wrpc_print_loading_time( $time ) {
-		echo '<div style="position: fixed;top: 0px;background-color: dimgrey;color: #FFF;text-align: center;width: 100%;padding: 12px 0px;">Page executed in ' . $time . ' seconds. by WP Power Cache</div>';
+if ( ! function_exists( 'wrpc_create_cache_dir' ) ) {
+	function wrpc_create_cache_dir() {
+		$cacheFolder = isset( $_SERVER['SERVER_NAME'] ) ? md5( $_SERVER['SERVER_NAME'] ) : 'wr-power-cache';
+		if ( ! file_exists( WRPC_ROOT_DIR . $cacheFolder ) ) {
+			mkdir( WRPC_ROOT_DIR . $cacheFolder );
+			WR_Power_Cache::generate_htaccess($cacheFolder);
+		}
 	}
 }
 
@@ -59,3 +45,5 @@ if ( ! function_exists( 'wrpc_lazy_img_add_placeholders' ) ) {
 		return WR_LazyLoad_Images::add_image_placeholders( $content );
 	}
 }
+
+add_action('activate_plugin','wrpc_create_cache_dir');
