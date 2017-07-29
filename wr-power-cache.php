@@ -27,14 +27,31 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 		private $actions = array(
 			'clear_cache' => [
 				'switch_theme',
-				'comment_post',
-				'permalink_structure_changed',
-				'save_post', /* Test all below */
-				'edit_category_form',
-				'edited_category',
+
 				'wp_insert_comment',
+				'comment_post',
+				'edit_comment',
+				'wp_set_comment_status',
+
+				'permalink_structure_changed',
+
+				'wp_trash_post',
+				'publish_post',
+				'edit_post',
+				'delete_post',
+				'pre_post_update',
+				'transition_post_status',
+
+				'trackback_post',
+				'pingback_post',
+				'wp_update_nav_menu',
+
+				'edit_category_form', /* Test all below */
+				'edited_category',
+
 				'activated_plugin',
 				'deactivated_plugin',
+				'delete_category',
 			]
 		);
 
@@ -78,8 +95,18 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 			}
 		}
 
-		public function clear_cache_file( $post ) {
-			if ( isset( $post ) && isset( $post['post_name'] ) && $post['post_name'] != "" ) {
+		public function clear_cache_file( $post_id, $post = null, $otherObj = null ) {
+			//pre(func_get_args(),true);
+			if(is_object($otherObj) && $otherObj instanceof WP_Term ) {
+				wrpc_recursive_dir_delete( WRPC_ROOT_DIR . $this->cacheFolder );
+			}
+			if(is_object($post) && $post instanceof WP_Comment) {
+				$post_id = $post->comment_post_ID;
+				$comment_post = get_post($post_id);
+				$this->currentCacheFile = $comment_post->post_name;
+				@unlink( $this->cache_file_path() );
+			}
+			else if ( isset( $post ) && isset( $post['post_name'] ) && $post['post_name'] != "" ) {
 				$this->currentCacheFile = $post['post_name'];
 				@unlink( $this->cache_file_path() );
 			} else {
@@ -170,7 +197,6 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 
 		private function add_actions() {
 			add_action( 'registered_taxonomy', array( $this, 'start_page_load_time' ) );
-			add_action( 'pre_post_update', array( $this, 'save_post_action_handler' ), 10, 3 );
 			add_action( 'parse_request', array( $this, 'get_post_action_handler' ), 10, 3 );
 			add_action( 'pre_get_posts', array( $this, 'load_cache_action_handler' ), 10, 3 );
 			foreach ( $this->actions['clear_cache'] as $action ) {
@@ -234,6 +260,11 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 			echo '<div style="position: fixed;top: 0px;background-color: dimgrey;color: #FFF;text-align: center;width: 100%;padding: 12px 0px;">';
 			_e('Page executed in ' . $time . ' seconds. by WP Power Cache');
 			echo '</div>';
+		}
+		
+		static public function clear_all_cache() {
+			$catch_folder = isset( $_SERVER['SERVER_NAME'] ) ? md5( $_SERVER['SERVER_NAME'] ) : 'wr-power-cache';
+			wrpc_recursive_dir_delete( WRPC_ROOT_DIR . $catch_folder );
 		}
 
 		static public function generate_htaccess($folder) {
