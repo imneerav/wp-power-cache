@@ -19,6 +19,7 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 		/* Add Settings Page Link */
 		public function add_wp_power_cache_settings_link( $links ) {
 			$settings_link = '<a href="admin.php?page=setting-power-cache">' . __( 'Settings' ) . '</a>';
+
 			return array_push( $links, $settings_link );
 		}
 
@@ -113,6 +114,19 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 		public function developer_flag_callback() {
 		}
 
+		public function clear_all_cache_by_admin() {
+			WR_Power_Cache::clear_all_cache();
+			wp_send_json_success( "success" );
+		}
+
+		public function clear_all_cache_notice() {
+			?>
+            <div class="notice notice-success" style="display:none;">
+                <p><?php _e( 'All cache deleted successfully...!', 'wp-power-cache' ); ?></p>
+            </div>
+			<?php
+		}
+
 		private function add_filters() {
 			add_filter( 'plugin_action_links_' . plugin_basename( __FILE__ ), array(
 				$this,
@@ -124,6 +138,10 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 			add_action( 'admin_menu', array( $this, 'power_cache_menu' ), 10, 3 );
 			add_action( 'admin_init', array( $this, 'power_cache_init' ), 10, 3 );
 			add_action( 'admin_notices', array( $this, 'wp_power_cache_admin_notice' ) );
+
+			add_action( 'wp_ajax_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
+			add_action( 'wp_ajax_nopriv_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
+			add_action( 'admin_notices', array( $this, 'clear_all_cache_notice' ) );
 		}
 
 		static public function run() {
