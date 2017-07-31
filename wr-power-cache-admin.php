@@ -14,6 +14,10 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 		public function __construct() {
 			$this->add_actions();
 			$this->add_filters();
+
+      add_action( 'wp_ajax_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
+      add_action( 'wp_ajax_nopriv_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
+      add_action( 'admin_notices', array($this,'clear_all_cache_notice'));
 		}
 
 		/* Add Settings Page Link */
@@ -151,8 +155,19 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 
 			return self::$instance;
 		}
-	}
 
+    public function clear_all_cache_by_admin() {
+      WR_Power_Cache::clear_all_cache();
+        wp_send_json_success("success");
+    }
+    function clear_all_cache_notice() {
+      ?>
+      <div class="notice notice-success is-dismissible" style="display:none;">
+        <p><?php _e( 'All cache successfully deleted!', 'my_plugin_textdomain' ); ?></p>
+      </div>
+      <?php
+    }
+	}
 	WR_Power_Cache_Admin::run();
 endif;
 
