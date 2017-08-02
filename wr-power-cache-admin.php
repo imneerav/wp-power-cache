@@ -149,24 +149,11 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 		}
 
 		static public function run() {
-			if ( self::$instance == null ) {
-				self::$instance = new self();
-			}
-
-			return self::$instance;
-		}
-
-    public function clear_all_cache_by_admin() {
-      WR_Power_Cache::clear_all_cache();
-        wp_send_json_success("success");
-    }
-    function clear_all_cache_notice() {
-      ?>
-      <div class="notice notice-success is-dismissible" style="display:none;">
-        <p><?php _e( 'All cache successfully deleted!', 'my_plugin_textdomain' ); ?></p>
-      </div>
-      <?php
-    }
+          if (self::$instance == NULL) {
+            self::$instance = new self();
+          }
+          return self::$instance;
+        }
 	}
 	WR_Power_Cache_Admin::run();
 endif;
