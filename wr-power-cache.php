@@ -58,14 +58,17 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 		public function __construct() {
 			define( 'WRPC_ROOT_DIR', str_replace( '\\', '/', dirname( __FILE__ ) ) . '/' );
 			$this->cacheFolder = isset( $_SERVER['SERVER_NAME'] ) ? md5( $_SERVER['SERVER_NAME'] ) : $this->cacheFolder;
-			if ( ! file_exists( WRPC_ROOT_DIR . $this->cacheFolder ) ) {
+
+			if ( $this->isFront && ! file_exists( WRPC_ROOT_DIR . $this->cacheFolder ) ) {
 				wrpc_create_cache_dir();
 			}
 			$this->add_filters();
 			$this->add_actions();
 
 			$settings   = (array) get_option( 'wp_power_cache_settings' );
-			$is_dev     = esc_attr( $settings["developer_flag"] );
+			if(isset($settings["developer_flag"])) {
+				$is_dev     = esc_attr( $settings["developer_flag"] );
+			}
 			$debug_flag = esc_attr( $settings["debug_flag"] );
 
 			$this->isDev   = ( isset( $is_dev ) && $is_dev == 1 ) ? true : false;
@@ -74,7 +77,9 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 
 		public function get_post_action_handler( $q ) {
 			$this->currentCacheFile = $this->get_query_parameters( $q );
-			if ( $this->validate_cache_file() ) {
+			$this->front_or_admin();
+
+			if ( $this->isFront && $this->validate_cache_file() ) {
 				if ( ! file_exists( WRPC_ROOT_DIR . $this->cacheFolder ) ) {
 					mkdir( WRPC_ROOT_DIR . $this->cacheFolder, 0777, true );
 				}
@@ -100,13 +105,18 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 			if(is_object($otherObj) && $otherObj instanceof WP_Term ) {
 				wrpc_recursive_dir_delete( WRPC_ROOT_DIR . $this->cacheFolder );
 			}
+			//echo "<pre>";print_r($post);exit;
 			if(is_object($post) && $post instanceof WP_Comment) {
 				$post_id = $post->comment_post_ID;
 				$comment_post = get_post($post_id);
 				$this->currentCacheFile = $comment_post->post_name;
 				@unlink( $this->cache_file_path() );
 			}
-			else if ( isset( $post ) && isset( $post['post_name'] ) && $post['post_name'] != "" ) {
+			elseif(is_object($post) && $post instanceof WP_Post) {
+				$this->currentCacheFile = $post->post_name;
+				@unlink( $this->cache_file_path() );
+			}
+			elseif ( is_array( $post ) && isset( $post['post_name'] ) && $post['post_name'] != "" ) {
 				$this->currentCacheFile = $post['post_name'];
 				@unlink( $this->cache_file_path() );
 			} else {

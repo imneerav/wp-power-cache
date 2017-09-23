@@ -6,6 +6,8 @@
  * Plugin URI: http://wpretro.com/plugins/Power-Cache
  * Version: 0.0.1
  */
+ini_set('display_startup_errors', 1);
+ini_set('display_errors', 1);
 
 if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 	class WR_Power_Cache_Admin {
@@ -15,9 +17,9 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 			$this->add_actions();
 			$this->add_filters();
 
-      add_action( 'wp_ajax_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
-      add_action( 'wp_ajax_nopriv_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
-      add_action( 'admin_notices', array($this,'clear_all_cache_notice'));
+            add_action( 'wp_ajax_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
+            add_action( 'wp_ajax_nopriv_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
+            add_action( 'admin_notices', array($this,'clear_all_cache_notice'));
 		}
 
 		/* Add Settings Page Link */
@@ -72,7 +74,9 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 		public function developer_flag_settings_callback() {
 			$settings = (array) get_option( 'wp_power_cache_settings' );
 			$field    = "developer_flag";
-			$is_dev   = esc_attr( $settings[ $field ] );
+			if(isset($settings[ $field] )) {
+				$is_dev = esc_attr( $settings[ $field ] );
+			}
 			$checked  = '';
 			if ( isset( $is_dev ) && $is_dev == 1 ) {
 				$checked = 'checked';
@@ -143,10 +147,7 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 			add_action( 'admin_init', array( $this, 'power_cache_init' ), 10, 3 );
 			add_action( 'admin_notices', array( $this, 'wp_power_cache_admin_notice' ) );
 
-			add_action( 'wp_ajax_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
-			add_action( 'wp_ajax_nopriv_clear_all_cache', array( $this, 'clear_all_cache_by_admin' ) );
-			add_action( 'admin_notices', array( $this, 'clear_all_cache_notice' ) );
-		}
+			}
 
 		static public function run() {
           if (self::$instance == NULL) {
