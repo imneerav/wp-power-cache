@@ -65,9 +65,9 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 			$this->add_filters();
 			$this->add_actions();
 
-			$settings   = (array) get_option( 'wp_power_cache_settings' );
-			if(isset($settings["developer_flag"])) {
-				$is_dev     = esc_attr( $settings["developer_flag"] );
+			$settings = (array) get_option( 'wp_power_cache_settings' );
+			if ( isset( $settings["developer_flag"] ) ) {
+				$is_dev = esc_attr( $settings["developer_flag"] );
 			}
 			$debug_flag = esc_attr( $settings["debug_flag"] );
 
@@ -101,26 +101,45 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 		}
 
 		public function clear_cache_file( $post_id, $post = null, $otherObj = null ) {
-			//pre(func_get_args(),true);
-			if(is_object($otherObj) && $otherObj instanceof WP_Term ) {
-				wrpc_recursive_dir_delete( WRPC_ROOT_DIR . $this->cacheFolder );
-			}
-			//echo "<pre>";print_r($post);exit;
-			if(is_object($post) && $post instanceof WP_Comment) {
-				$post_id = $post->comment_post_ID;
-				$comment_post = get_post($post_id);
-				$this->currentCacheFile = $comment_post->post_name;
-				@unlink( $this->cache_file_path() );
-			}
-			elseif(is_object($post) && $post instanceof WP_Post) {
+			//Only post id is passed
+			if ( $post_id != null && is_string( $post ) ) {
+				$post                   = get_post( $post_id );
 				$this->currentCacheFile = $post->post_name;
 				@unlink( $this->cache_file_path() );
-			}
-			elseif ( is_array( $post ) && isset( $post['post_name'] ) && $post['post_name'] != "" ) {
-				$this->currentCacheFile = $post['post_name'];
+			} //If Comment is added / updated
+			else if ( is_object( $post ) && $post instanceof WP_Comment ) {
+				$post_id                = $post->comment_post_ID;
+				$comment_post           = get_post( $post_id );
+				$this->currentCacheFile = $comment_post->post_name;
 				@unlink( $this->cache_file_path() );
-			} else {
+			} //If Term is updated
+			else if ( is_object( $otherObj ) && $otherObj instanceof WP_Term ) {
 				wrpc_recursive_dir_delete( WRPC_ROOT_DIR . $this->cacheFolder );
+			} //When Publish event occur
+			else if ( is_object( $otherObj ) && $otherObj instanceof WP_Post ) {
+				$this->currentCacheFile = $otherObj->post_name;
+				if ( file_exists( $this->cache_file_path() ) ) {
+					@unlink( $this->cache_file_path() );
+				}
+			} //If Post is added / updated
+			elseif ( is_object( $post ) && $post instanceof WP_Post ) {
+				$this->currentCacheFile = $post->post_name;
+				@unlink( $this->cache_file_path() );
+			} elseif ( is_array( $post ) && isset( $post['post_name'] ) && $post['post_name'] != "" ) {
+				$this->currentCacheFile = $post['post_name'];
+				if ( file_exists( $this->cache_file_path() ) ) {
+					@unlink( $this->cache_file_path() );
+				}
+			} else {
+				if($this->currentCacheFile!='') {
+					@unlink( $this->cache_file_path() );
+				}
+				else {
+					/*pre( $this->currentCacheFile );
+					pre( $this->cache_file_path() );
+					pre( func_get_args(), true );*/
+					wrpc_recursive_dir_delete( WRPC_ROOT_DIR . $this->cacheFolder );
+				}
 			}
 		}
 
@@ -182,7 +201,8 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 				'image/vnd.microsoft.icon'      => 'ico'
 			);
 
-			$invalid_ext = apply_filters('WP_Power_Cache_Invalid_Ext',$invalid_ext);
+			$invalid_ext = apply_filters( 'WP_Power_Cache_Invalid_Ext', $invalid_ext );
+
 			return $invalid_ext;
 		}
 
@@ -268,16 +288,16 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 
 		private function wrpc_print_loading_time( $time ) {
 			echo '<div style="position: fixed;top: 0px;background-color: dimgrey;color: #FFF;text-align: center;width: 100%;padding: 12px 0px;">';
-			_e('Page executed in ' . $time . ' seconds. by WP Power Cache');
+			_e( 'Page executed in ' . $time . ' seconds. by WP Power Cache' );
 			echo '</div>';
 		}
-		
+
 		static public function clear_all_cache() {
 			$catch_folder = isset( $_SERVER['SERVER_NAME'] ) ? md5( $_SERVER['SERVER_NAME'] ) : 'wr-power-cache';
 			wrpc_recursive_dir_delete( WRPC_ROOT_DIR . $catch_folder );
 		}
 
-		static public function generate_htaccess($folder) {
+		static public function generate_htaccess( $folder ) {
 			$content = "# BEGIN WP Power Cache
 			Options -Indexes
 			<IfModule mod_mime.c>
