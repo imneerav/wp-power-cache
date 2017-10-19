@@ -48,7 +48,7 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 					&$this,
 					'cache_status_flag_callback'
 				), 'setting-power-cache' );
-				add_settings_field( 'developer_flag_settings', __( 'Enable / Disable Caching', 'wp-power-cache' ), array(
+				add_settings_field( 'cache_status_flag_settings', __( 'Enable / Disable Caching', 'wp-power-cache' ), array(
 					&$this,
 					'cache_status_flag_settings_callback'
 				), 'setting-power-cache', 'cache_status_flag' );

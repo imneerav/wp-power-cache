@@ -23,32 +23,26 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 		private $isFront, $isAdmin = false;
 		private $currentCacheFile = '';
 		protected static $instance, $startTime, $endTime = '';
-		private $isDev, $isDebug = true;
+		private $cacheStatus = true, $isDev, $isDebug = true;
 		private $actions = array(
 			'clear_cache' => [
 				'switch_theme',
-
 				'wp_insert_comment',
 				'comment_post',
 				'edit_comment',
 				'wp_set_comment_status',
-
 				'permalink_structure_changed',
-
 				'wp_trash_post',
 				'publish_post',
 				'edit_post',
 				'delete_post',
 				'pre_post_update',
 				'transition_post_status',
-
 				'trackback_post',
 				'pingback_post',
 				'wp_update_nav_menu',
-
-				'edit_category_form', /* Test all below */
+				'edit_category_form',
 				'edited_category',
-
 				'activated_plugin',
 				'deactivated_plugin',
 				'delete_category',
@@ -56,6 +50,17 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 		);
 
 		public function __construct() {
+
+			$settings = (array) get_option( 'wp_power_cache_settings', '' );
+
+			if ( isset( $settings["cache_status_flag"] ) && $settings["cache_status_flag"] != '') {
+				$cacheStatus = esc_attr( $settings["cache_status_flag"] );
+			}
+
+			$this->cacheStatus      = ( isset( $cacheStatus ) && $cacheStatus == 1 ) ? true : false;
+
+			if(!$this->cacheStatus) return;
+
 			define( 'WRPC_ROOT_DIR', str_replace( '\\', '/', dirname( __FILE__ ) ) . '/' );
 			$this->cacheFolder = isset( $_SERVER['SERVER_NAME'] ) ? md5( $_SERVER['SERVER_NAME'] ) : $this->cacheFolder;
 
@@ -65,14 +70,14 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 			$this->add_filters();
 			$this->add_actions();
 
-			$settings = (array) get_option( 'wp_power_cache_settings' );
+
 			if ( isset( $settings["developer_flag"] ) ) {
 				$is_dev = esc_attr( $settings["developer_flag"] );
 			}
 			$debug_flag = esc_attr( $settings["debug_flag"] );
 
-			$this->isDev   = ( isset( $is_dev ) && $is_dev == 1 ) ? true : false;
-			$this->isDebug = ( isset( $debug_flag ) && $debug_flag == 1 ) ? true : false;
+			$this->isDev            = ( isset( $is_dev ) && $is_dev == 1 ) ? true : false;
+			$this->isDebug          = ( isset( $debug_flag ) && $debug_flag == 1 ) ? true : false;
 		}
 
 		public function get_post_action_handler( $q ) {
