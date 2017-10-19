@@ -44,6 +44,15 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 
 			if ( $active_tab == 'debug_options' ) {
 
+				add_settings_section( 'cache_status_flag', __( '', 'wp-power-cache' ), array(
+					&$this,
+					'cache_status_flag_callback'
+				), 'setting-power-cache' );
+				add_settings_field( 'developer_flag_settings', __( 'Enable / Disable Caching', 'wp-power-cache' ), array(
+					&$this,
+					'cache_status_flag_settings_callback'
+				), 'setting-power-cache', 'cache_status_flag' );
+
 				add_settings_section( 'developer_flag', __( 'Developer Mode', 'wp-power-cache' ), array(
 					&$this,
 					'developer_flag_callback'
@@ -62,6 +71,15 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 					'debug_field_callback'
 				), 'setting-power-cache', 'debug_flag' );
 
+				add_settings_section( 'lazy_loading_flag', __( 'Lazy Loading', 'wp-power-cache' ), array(
+					&$this,
+					'lazy_callback'
+				), 'setting-power-cache' );
+				add_settings_field( 'lazy_loading_settings', __( 'Enable', 'wp-power-cache' ), array(
+					&$this,
+					'lazy_loading_callback'
+				), 'setting-power-cache', 'lazy_loading_flag' );
+
 			}
 			if ( $active_tab == 'other_options' ) {
 				add_settings_section( 'others', __( 'Coming Soon.', 'wp-power-cache' ), array(
@@ -70,6 +88,24 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 				), 'setting-power-cache' );
 			}
 		}
+
+		public function cache_status_flag_callback() {
+
+        }
+
+        public function cache_status_flag_settings_callback() {
+	        $settings = (array) get_option( 'wp_power_cache_settings' );
+	        $field    = "cache_status";
+	        if(isset($settings[ $field] )) {
+		        $enable_cache = esc_attr( $settings[ $field ] );
+	        }
+	        $checked  = '';
+	        if ( isset( $enable_cache ) && $enable_cache == 1 ) {
+		        $checked = 'checked';
+	        }
+	        echo '<input type="checkbox" name="wp_power_cache_settings[cache_status]" value="1"' . $checked . '/>';
+	        _e( '&nbsp;&nbsp;Enable / Disable Power Cache.', 'wp-power-cache' );
+        }
 
 		public function developer_flag_settings_callback() {
 			$settings = (array) get_option( 'wp_power_cache_settings' );
@@ -121,6 +157,22 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 
 		public function developer_flag_callback() {
 		}
+
+		public function lazy_callback() {
+
+        }
+
+        public function lazy_loading_callback() {
+	        $settings = (array) get_option( 'wp_power_cache_settings' );
+	        $field    = "lazy_loading_flag_settings";
+	        $enable_lazy_loading  = esc_attr( $settings[ $field ] );
+	        $checked  = '';
+	        if ( isset( $enable_lazy_loading ) && $enable_lazy_loading == 1 ) {
+		        $checked = 'checked';
+	        }
+	        echo '<input type="checkbox" name="wp_power_cache_settings[lazy_loading_flag_settings]" value="1"' . $checked . '/>';
+	        _e( '&nbsp;&nbsp;Enable / Disable Lazy Loading for Images.', 'wp-power-cache' );
+        }
 
 		public function clear_all_cache_by_admin() {
 			WR_Power_Cache::clear_all_cache();
