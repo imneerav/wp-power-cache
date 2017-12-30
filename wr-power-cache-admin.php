@@ -95,7 +95,7 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 
         public function cache_status_flag_settings_callback() {
 	        $settings = (array) get_option( 'wp_power_cache_settings' );
-	        $field    = "cache_status";
+	        $field    = "cache_status_flag";
 	        if(isset($settings[ $field] )) {
 		        $enable_cache = esc_attr( $settings[ $field ] );
 	        }
@@ -103,7 +103,7 @@ if ( ! class_exists( 'WR_Power_Cache_Admin' ) ) :
 	        if ( isset( $enable_cache ) && $enable_cache == 1 ) {
 		        $checked = 'checked';
 	        }
-	        echo '<input type="checkbox" name="wp_power_cache_settings[cache_status]" value="1"' . $checked . '/>';
+	        echo '<input type="checkbox" name="wp_power_cache_settings[cache_status_flag]" value="1"' . $checked . '/>';
 	        _e( '&nbsp;&nbsp;Enable / Disable Power Cache.', 'wp-power-cache' );
         }
 

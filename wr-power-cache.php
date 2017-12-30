@@ -59,7 +59,7 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 
 			$this->cacheStatus      = ( isset( $cacheStatus ) && $cacheStatus == 1 ) ? true : false;
 
-			if(!$this->cacheStatus) return;
+			//if(!$this->cacheStatus) return;
 
 			define( 'WRPC_ROOT_DIR', str_replace( '\\', '/', dirname( __FILE__ ) ) . '/' );
 			$this->cacheFolder = isset( $_SERVER['SERVER_NAME'] ) ? md5( $_SERVER['SERVER_NAME'] ) : $this->cacheFolder;
