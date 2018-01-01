@@ -21,9 +21,7 @@ if ( ! class_exists( 'WR_LazyLoad_Images' ) ) :
 		}
 
 		static function enque_scripts() {
-			wp_enqueue_script( 'wpcom-lazy-load-images', self::get_plugin_url( 'assets/js/lazy-load.js' ), array(
-				'jquery'
-			), self::version, true );
+			wp_enqueue_script( 'wpcom-lazy-load-images', self::get_plugin_url( 'assets/js/lazy-load.js' ), array( 'jquery' ), self::version, true );
 		}
 
 		static function enable_img_placeholders( $content ) {

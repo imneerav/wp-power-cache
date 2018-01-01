@@ -22,7 +22,7 @@ $active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'debug_options';
     <form action="options.php" method="POST">
 		<?php settings_fields( 'wp-power-cache-group' ); ?>
 		<?php do_settings_sections( 'setting-power-cache' ); ?>
-        <input type="submit" name="save_settings" id="submit" class="button button-primary" value="Save Changes"
+        <input type="submit" name="save_settings" id="save_settings" class="button button-primary" value="Save Changes"
                style="float: left;margin-right: 5px;">
     </form>
     <form action="" method="POST">
@@ -41,11 +41,18 @@ $active_tab = isset( $_GET['tab'] ) ? $_GET['tab'] : 'debug_options';
                     success: function (response) {
                         if (response.success == true) {
                             $(".notice-success").fadeIn();
-                            jQuery(".notice-success").fadeOut(10000);
+                          $(".notice-success").fadeOut(10000);
                         }
                     }
                 });
             }
         });
+      $('#save_settings').click(function () {
+          jQuery.ajax({
+            type: 'POST',
+            data: {action: 'clear_all_cache'},
+            url: '<?php echo admin_url( 'admin-ajax.php' )?>'
+          });
+      });
     });
 </script>							   

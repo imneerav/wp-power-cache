@@ -15,7 +15,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once 'functions.php';
 require_once 'wr-power-cache-admin.php';
-require_once 'wr-lazy-load.php';
 
 if ( ! class_exists( 'WR_Power_Cache' ) ) :
 	class WR_Power_Cache {
@@ -59,7 +58,7 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 
 			$this->cacheStatus      = ( isset( $cacheStatus ) && $cacheStatus == 1 ) ? true : false;
 
-			//if(!$this->cacheStatus) return;
+			if(!$this->cacheStatus) return;
 
 			define( 'WRPC_ROOT_DIR', str_replace( '\\', '/', dirname( __FILE__ ) ) . '/' );
 			$this->cacheFolder = isset( $_SERVER['SERVER_NAME'] ) ? md5( $_SERVER['SERVER_NAME'] ) : $this->cacheFolder;
@@ -70,14 +69,18 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 			$this->add_filters();
 			$this->add_actions();
 
-
 			if ( isset( $settings["developer_flag"] ) ) {
 				$is_dev = esc_attr( $settings["developer_flag"] );
 			}
 			$debug_flag = esc_attr( $settings["debug_flag"] );
+			$lazy_flag = esc_attr( $settings["lazy_loading_flag_settings"] );
 
 			$this->isDev            = ( isset( $is_dev ) && $is_dev == 1 ) ? true : false;
 			$this->isDebug          = ( isset( $debug_flag ) && $debug_flag == 1 ) ? true : false;
+			$this->isLazy          = ( isset( $lazy_flag ) && $lazy_flag == 1 ) ? true : false;
+			if($this->isLazy) {
+				require_once 'wr-lazy-load.php';
+			}
 		}
 
 		public function get_post_action_handler( $q ) {
@@ -292,7 +295,7 @@ if ( ! class_exists( 'WR_Power_Cache' ) ) :
 		}
 
 		private function wrpc_print_loading_time( $time ) {
-			echo '<div style="position: fixed;top: 0px;background-color: dimgrey;color: #FFF;text-align: center;width: 100%;padding: 12px 0px;">';
+			echo '<div style="position: fixed;top: 0px;background-color: dimgrey;color: #FFF;text-align: center;width: 100%;padding: 12px 0px;z-index:999999999">';
 			_e( 'Page executed in ' . $time . ' seconds. by WP Power Cache' );
 			echo '</div>';
 		}
